@@ -10,6 +10,7 @@ let server = http.createServer(app);
 let io = socketIO(server);
 
 const {generateMessage, generateLocationMessage} = require('./utils/message');
+const {isRealString} = require('./utils/validation');
 
 app.use(express.static(publicPath));
 
@@ -20,19 +21,27 @@ io.on('connection', (socket) => {
 
     socket.broadcast.emit('newMessage', generateMessage('Admin', 'New User joined'));
 
-   socket.on('createMessage', (message, callback) => {
-        console.log('createMessage', message);
-        io.emit('newMessage', generateMessage(message.from, message.text));
+    socket.on('join', (params, callback) => {
+        if (!isRealString(params.name) || !isRealString(params.room)) {
+            callback('Name and room name are required');
+        }
+
         callback();
     });
 
-    socket.on('createLocationMessage', (coords) => {
-        io.emit('newLocationMessage', generateLocationMessage('Admin', coords.latitude, coords.longitude));
-    });
+    socket.on('createMessage', (message, callback) => {
+            console.log('createMessage', message);
+            io.emit('newMessage', generateMessage(message.from, message.text));
+            callback();
+        });
 
-    socket.on('disconnect', () => {
-        console.log('User has disconnected');
-    });
+        socket.on('createLocationMessage', (coords) => {
+            io.emit('newLocationMessage', generateLocationMessage('Admin', coords.latitude, coords.longitude));
+        });
+
+        socket.on('disconnect', () => {
+            console.log('User has disconnected');
+        });
 });
 
 server.listen(port, () => {
