@@ -14,8 +14,8 @@ describe('isRealString', () => {
         expect(res).toBe(false);
     });
 
-    it('should allow strings with non-space characters', () => {
-        let res = isRealString('Cool Chat Room');
+    it('should allow strings with non-space char', () => {
+        let res = isRealString('  Chat Room ');
         expect(res).toBe(true);
     });
 });
